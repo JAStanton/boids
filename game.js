@@ -3,7 +3,7 @@ var Crafty = require('craftyjs');
 
 const MAGIC = false;
 
-const SCREEN_WIDTH = 800;
+const SCREEN_WIDTH = 1000;
 const SCREEN_HEIGHT = 600;
 
 const ATTRACTOR_WIDTH = 10;
@@ -19,13 +19,14 @@ class Boids {
     this.attractors = [];
 
     this.maxSpeed = 200;
-    this.wallDistance = 20;
+    this.wallDistance = 60;
     this.centerOfMassPercent = 21;
     this.distanceUnit = 23;
     this.distancePercent = 80;
     this.matchVelocityPercent = 88;
     this.attractorDistance = 200;
     this.attractorPercent = 98;
+    this.jitter = 18;
 
     this.init();
 
@@ -50,11 +51,12 @@ class Boids {
       const y = _.random(0, SCREEN_HEIGHT - BOID_WIDTH);
       const vx = _.random(-100, 100);
       const vy = _.random(-100, 100);
+      const width = _.random(3, 4, true);
       const boid = Crafty.e('2D, Canvas, Color, Motion').attr({
         x: x,
         y: y,
-        w: BOID_WIDTH,
-        h: BOID_WIDTH,
+        w: width,
+        h: width,
         velocity: new Vector(vx, vy),
         position: new Vector(x, y),
         particle: MAGIC ? this._createParticle(x, y) : {},
@@ -157,7 +159,10 @@ class Boids {
   }
 
   _addJitter(boid) {
-    return new Vector(_.random(-15, 15), _.random(-15, 15));
+    return new Vector(
+      _.random(-this.jitter, this.jitter),
+      _.random(-this.jitter, this.jitter)
+    );
   }
 
   _ruleCenterOfMass(boid) {
@@ -248,3 +253,4 @@ gui.add(boids, 'distancePercent', 0, 100);
 gui.add(boids, 'matchVelocityPercent', 0, 100);
 gui.add(boids, 'attractorDistance', 0, 500);
 gui.add(boids, 'attractorPercent', 0, 100);
+gui.add(boids, 'jitter', 0, 100);
