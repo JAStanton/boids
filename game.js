@@ -20,10 +20,10 @@ class Boids {
 
     this.maxSpeed = 200;
     this.wallDistance = 60;
-    this.centerOfMassPercent = 21;
+    this.centerOfMassPercent = 79;
     this.distanceUnit = 23;
     this.distancePercent = 80;
-    this.matchVelocityPercent = 88;
+    this.matchVelocityPercent = 12;
     this.attractorDistance = 200;
     this.attractorPercent = 98;
     this.jitter = 18;
@@ -173,7 +173,7 @@ class Boids {
     });
     velocity.divide(new Vector(NUM_BOIDS - 1, NUM_BOIDS - 1));
     return velocity.subtract(boid.position)
-      .divide(new Vector(this.centerOfMassPercent, this.centerOfMassPercent));
+      .divide(new Vector(100 - this.centerOfMassPercent, 100 - this.centerOfMassPercent));
   }
 
   _ruleDistance(boid) {
@@ -185,7 +185,7 @@ class Boids {
       }
     })
 
-    return velocity;
+    return velocity.scale(this.distancePercent / 100);
   }
 
   _ruleMatchVelocity(boid) {
@@ -197,7 +197,7 @@ class Boids {
 
     return velocity.divide(new Vector(NUM_BOIDS - 1, NUM_BOIDS - 1))
       .subtract(boid.velocity)
-      .divide(new Vector(this.matchVelocityPercent, this.matchVelocityPercent));
+      .divide(new Vector(101 - this.matchVelocityPercent, 101 - this.matchVelocityPercent));
   }
 
   _ruleStayAwayFromTheWalls(boid) {
