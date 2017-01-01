@@ -28,13 +28,13 @@ class Boids {
     this.matchVelocityPercent = 68;
 
     this.attractorDistance = 200;
-    this.attractorPercent = 96;
+    this.attractorPercent = 93;
 
-    this.maxSpeed = 200;
+    this.maxSpeed = 350;
     this.jitter = 4;
     this.wallDistance = 60;
 
-    this.wrapAround = true;
+    this.wrapAround = false;
 
     this.init();
 
