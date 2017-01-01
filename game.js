@@ -69,7 +69,7 @@ class Boids {
         position: new Vector(x, y),
         particle: MAGIC ? this._createParticle(x, y) : {},
       })
-      .color(_.sample(['#FFF', '#F0F0F0', '#D0D0D0']))
+      .color('white')
       .bind("EnterFrame", function(eventData) {
         that.frame(eventData, this);
       });
