@@ -19,16 +19,20 @@ class Boids {
     this.attractors = [];
 
     this.maxSpeed = 350;
+    this.jitter = 4;
     this.wallDistance = 60;
+
     this.centerOfMassDistance = 265;
     this.centerOfMassPercent = 17;
+
     this.distanceUnit = 23;
     this.distancePercent = 80;
+
     this.matchVelocityDistance = 42;
     this.matchVelocityPercent = 68;
+
     this.attractorDistance = 200;
     this.attractorPercent = 98;
-    this.jitter = 4;
 
     this.init();
 
@@ -269,14 +273,28 @@ class Boids {
 const boids = new Boids();
 const gui = new dat.GUI();
 
-gui.add(boids, 'maxSpeed', 0, 1000);
-gui.add(boids, 'wallDistance', 0, 362);
-gui.add(boids, 'centerOfMassDistance', 0, 500);
-gui.add(boids, 'centerOfMassPercent', 0, 100);
-gui.add(boids, 'distanceUnit', 0, 200);
-gui.add(boids, 'distancePercent', 0, 100);
-gui.add(boids, 'matchVelocityDistance', 0, 500);
-gui.add(boids, 'matchVelocityPercent', 0, 100);
-gui.add(boids, 'attractorDistance', 0, 500);
-gui.add(boids, 'attractorPercent', 0, 100);
-gui.add(boids, 'jitter', 0, 100);
+const centerOfMass = gui.addFolder('Center of Mass');
+centerOfMass.add(boids, 'centerOfMassDistance', 0, 500).name('Distance');
+centerOfMass.add(boids, 'centerOfMassPercent', 0, 100).name('Percent');;
+centerOfMass.open();
+
+const maintainDistance = gui.addFolder('Maintain Distance');
+maintainDistance.add(boids, 'distanceUnit', 0, 200).name('Distance');;
+maintainDistance.add(boids, 'distancePercent', 0, 100).name('Percent');;
+maintainDistance.open();
+
+const matchVelocity = gui.addFolder('Match Velocity');
+matchVelocity.add(boids, 'matchVelocityDistance', 0, 500).name('Distance');;
+matchVelocity.add(boids, 'matchVelocityPercent', 0, 100).name('Percent');;
+matchVelocity.open();
+
+const attractor = gui.addFolder('Attractor');
+attractor.add(boids, 'attractorDistance', 0, 500).name('Distance');;
+attractor.add(boids, 'attractorPercent', 0, 100).name('Percent');;
+attractor.open();
+
+const misc = gui.addFolder('Misc');
+misc.add(boids, 'maxSpeed', 0, 1000).name('Max Speed');;
+misc.add(boids, 'wallDistance', 0, 362).name('Wall Distance');;
+misc.add(boids, 'jitter', 0, 100).name('Jitter');;
+misc.open();
