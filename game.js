@@ -2,7 +2,7 @@ var _ = require('lodash');
 var Crafty = require('craftyjs');
 
 const SCREEN_WIDTH = 900;
-const SCREEN_HEIGHT = 600;
+const SCREEN_HEIGHT = 570;
 
 const ATTRACTOR_WIDTH = 10;
 const DETRACTOR_WIDTH = 10;
