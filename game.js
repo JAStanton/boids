@@ -10,6 +10,7 @@ const BOID_WIDTH = 4;
 const NUM_BOIDS = 200;
 
 const Vector = Crafty.math.Vector2D;
+const ZERO_VECTOR = new Vector();
 
 class Boids {
 
@@ -206,7 +207,7 @@ class Boids {
         num++;
       }
     });
-    if (num === 0) return new Vector();
+    if (num === 0) return ZERO_VECTOR;
     velocity.divide(new Vector(num, num));
     return velocity.subtract(boid.position)
       .divide(new Vector(101 - this.centerOfMassPercent, 101 - this.centerOfMassPercent));
@@ -235,7 +236,7 @@ class Boids {
       }
     });
 
-    if (num === 0) return new Vector();
+    if (num === 0) return ZERO_VECTOR;
 
     return velocity.divide(new Vector(num, num))
       .subtract(boid.velocity)
@@ -282,7 +283,7 @@ class Boids {
   }
 
   _calcAttractors(boid) {
-    if (this.attractors.length === 0) return new Vector();
+    if (this.attractors.length === 0) return ZERO_VECTOR;
     let closestAttractor, closestDistance;
     _.each(this.attractors, function(attractor) {
       const distance = Math.abs(boid.position.distance(attractor.position));
@@ -296,11 +297,11 @@ class Boids {
         .subtract(boid.position)
         .divide(new Vector(101 - this.attractorPercent, 101 - this.attractorPercent));
     }
-    return new Vector();
+    return ZERO_VECTOR;
   }
 
   _calcWind() {
-    if (this.windPower === 0) return new Vector();
+    if (this.windPower === 0) return ZERO_VECTOR;
     const angle = this.windDirection * Math.PI / 180
     const x = Math.cos(angle) * this.windPower;
     const y = Math.sin(angle) * this.windPower;
