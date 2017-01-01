@@ -1,15 +1,13 @@
 var _ = require('lodash');
 var Crafty = require('craftyjs');
 
-const MAGIC = false;
-
 const SCREEN_WIDTH = 900;
 const SCREEN_HEIGHT = 600;
 
 const ATTRACTOR_WIDTH = 10;
 const DETRACTOR_WIDTH = 10;
 const BOID_WIDTH = 4;
-const NUM_BOIDS = MAGIC ? 10 : 200;
+const NUM_BOIDS = 200;
 
 const Vector = Crafty.math.Vector2D;
 
@@ -78,7 +76,6 @@ class Boids {
         h: width,
         velocity: new Vector(vx, vy),
         position: new Vector(x, y),
-        particle: MAGIC ? this._createParticle(x, y) : {},
       })
       .color('white')
       .bind('EnterFrame', function(eventData) {
@@ -120,9 +117,6 @@ class Boids {
     boid.x = boid.position.x;
     boid.y = boid.position.y;
 
-    boid.particle.x = boid.x;
-    boid.particle.y = boid.y;
-
     if (this.wrapAround) {
       if (boid.x > SCREEN_WIDTH) {
         boid.x = 0;
@@ -150,40 +144,6 @@ class Boids {
         _.sample([-this.maxSpeed, this.maxSpeed]),
         _.sample([-this.maxSpeed, this.maxSpeed])
       );
-    });
-  }
-
-  _createParticle(x, y) {
-    return Crafty.e("2D, Canvas, Particles").attr({ x: x, y: y }).particles({
-      maxParticles: 5,
-      size: 1,
-      sizeRandom: 2,
-      speed: 1,
-      speedRandom: 1.2,
-      // Lifespan in frames
-      lifeSpan: 29,
-      lifeSpanRandom: 7,
-      // Angle is calculated clockwise: 12pm is 0deg, 3pm is 90deg etc.
-      angle: 0,
-      angleRandom: 0,
-      startColour: [255, 255, 255, 255],
-      startColourRandom: [255, 255, 255, 255],
-      endColour: [255, 255, 255, 255],
-      endColourRandom: [255, 255, 255, 255],
-      // Only applies when fastMode is off, specifies how sharp the gradients are drawn
-      sharpness: 20,
-      sharpnessRandom: 10,
-      // Random spread from origin
-      spread: 10,
-      // How many frames should this last
-      duration: -1,
-      // Will draw squares instead of circle gradients
-      fastMode: true,
-      gravity: { x: 0, y: 0 },
-      // sensible values are 0-3
-      jitter: 1,
-      // Offset for the origin of the particles
-      originOffset: {x: 0, y: 0}
     });
   }
 
