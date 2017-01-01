@@ -3,7 +3,7 @@ var Crafty = require('craftyjs');
 
 const MAGIC = false;
 
-const SCREEN_WIDTH = 1000;
+const SCREEN_WIDTH = 900;
 const SCREEN_HEIGHT = 600;
 
 const ATTRACTOR_WIDTH = 10;
@@ -18,21 +18,23 @@ class Boids {
     this.boids = [];
     this.attractors = [];
 
-    this.maxSpeed = 350;
-    this.jitter = 4;
-    this.wallDistance = 60;
-
     this.centerOfMassDistance = 265;
     this.centerOfMassPercent = 17;
 
     this.distanceUnit = 23;
-    this.distancePercent = 80;
+    this.distancePercent = 49;
 
     this.matchVelocityDistance = 42;
     this.matchVelocityPercent = 68;
 
     this.attractorDistance = 200;
-    this.attractorPercent = 98;
+    this.attractorPercent = 96;
+
+    this.maxSpeed = 200;
+    this.jitter = 4;
+    this.wallDistance = 60;
+
+    this.wrapAround = true;
 
     this.init();
 
@@ -81,7 +83,9 @@ class Boids {
     modifiers.push(this._ruleCenterOfMass(boid));
     modifiers.push(this._ruleDistance(boid));
     modifiers.push(this._ruleMatchVelocity(boid));
-    modifiers.push(this._ruleStayAwayFromTheWalls(boid));
+    if (!this.wrapAround) {
+      modifiers.push(this._ruleStayAwayFromTheWalls(boid));
+    }
     modifiers.push(this._ruleAttractors(boid));
     modifiers.push(this._addJitter(boid));
 
@@ -105,6 +109,26 @@ class Boids {
 
     boid.particle.x = boid.x;
     boid.particle.y = boid.y;
+
+    if (this.wrapAround) {
+      if (boid.x > SCREEN_WIDTH) {
+        boid.x = 0;
+        boid.position.setValues(0, boid.position.y);
+      }
+      if (boid.x < 0) {
+        boid.x = SCREEN_WIDTH
+        boid.position.setValues(SCREEN_WIDTH, boid.position.y);
+      }
+
+      if (boid.y > SCREEN_HEIGHT) {
+        boid.y = 0;
+        boid.position.setValues(boid.position.x, 0);
+      }
+      if (boid.y < 0) {
+        boid.y = SCREEN_HEIGHT;
+        boid.position.setValues(boid.position.x, SCREEN_HEIGHT);
+    }
+    }
   }
 
   _createParticle(x, y) {
@@ -283,4 +307,5 @@ const misc = gui.addFolder('Misc');
 misc.add(boids, 'maxSpeed', 0, 1000).name('Max Speed');;
 misc.add(boids, 'wallDistance', 0, 362).name('Wall Distance');;
 misc.add(boids, 'jitter', 0, 100).name('Jitter');;
+misc.add(boids, 'wrapAround').name('Wrap Around');;
 misc.open();
