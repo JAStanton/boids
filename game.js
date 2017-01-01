@@ -252,20 +252,6 @@ class Boids {
         .divide(new Vector(100 - this.attractorPercent, 100 - this.attractorPercent));
     }
     return new Vector();
-  //   const velocity = new Vector();
-  //   if (this.attractors.length === 0) return velocity;
-  //   let numAttractors = 0;
-  //   _.each(this.attractors, a => {
-  //     if (Math.abs(boid.position.distance(a.position)) < this.attractorDistance) {
-  //       numAttractors++;
-  //       velocity.add(a.position);
-  //     }
-  //   });
-  //   if (numAttractors === 0) return velocity;
-  //   // velocity.divide(new Vector(numAttractors, numAttractors));
-  //   return velocity
-  //     .subtract(boid.position)
-  //     .divide(new Vector(100 - this.attractorPercent, 100 - this.attractorPercent));
   }
 
 }
