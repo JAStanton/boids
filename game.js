@@ -39,6 +39,9 @@ class Boids {
     this.jitter = 4;
     this.wallDistance = 0;
 
+    this.windDirection = 0;
+    this.windPower = 0;
+
     this.wrapAround = false;
 
     this.init();
@@ -97,6 +100,7 @@ class Boids {
     modifiers.push(this._calcAttractors(boid));
     modifiers.push(this._calcDetractors(boid));
     modifiers.push(this._addJitter(boid));
+    modifiers.push(this._calcWind());
 
     _.each(modifiers, (modifier) => boid.velocity.add(modifier));
 
@@ -245,7 +249,7 @@ class Boids {
     if (num === 0) return new Vector();
     velocity.divide(new Vector(num, num));
     return velocity.subtract(boid.position)
-      .divide(new Vector(100 - this.centerOfMassPercent, 100 - this.centerOfMassPercent));
+      .divide(new Vector(101 - this.centerOfMassPercent, 101 - this.centerOfMassPercent));
   }
 
   _calcDistance(boid) {
@@ -330,9 +334,17 @@ class Boids {
     if (closestAttractor) {
       return closestAttractor.position.clone()
         .subtract(boid.position)
-        .divide(new Vector(100 - this.attractorPercent, 100 - this.attractorPercent));
+        .divide(new Vector(101 - this.attractorPercent, 101 - this.attractorPercent));
     }
     return new Vector();
+  }
+
+  _calcWind() {
+    if (this.windPower === 0) return new Vector();
+    const angle = this.windDirection * Math.PI / 180
+    const x = Math.cos(angle) * this.windPower;
+    const y = Math.sin(angle) * this.windPower;
+    return new Vector(x, y)
   }
 
 }
@@ -340,30 +352,32 @@ class Boids {
 const boids = new Boids();
 const gui = new dat.GUI();
 
-const centerOfMass = gui.addFolder('Center of Mass');
+const centerOfMass = gui.addFolder('Cohesion');
 centerOfMass.add(boids, 'centerOfMassDistance', 0, 500).name('Distance');
 centerOfMass.add(boids, 'centerOfMassPercent', 0, 100).name('Percent');
 centerOfMass.open();
 
-const maintainDistance = gui.addFolder('Maintain Distance');
+const maintainDistance = gui.addFolder('Separation');
 maintainDistance.add(boids, 'distanceUnit', 0, 200).name('Distance');
 maintainDistance.add(boids, 'distancePercent', 0, 100).name('Percent');
 maintainDistance.open();
 
-const matchVelocity = gui.addFolder('Match Velocity');
+const matchVelocity = gui.addFolder('Alignment');
 matchVelocity.add(boids, 'matchVelocityDistance', 0, 500).name('Distance');
 matchVelocity.add(boids, 'matchVelocityPercent', 0, 100).name('Percent');
 matchVelocity.open();
 
-const attractor = gui.addFolder('Attractor');
+const attractor = gui.addFolder('Attractors');
 attractor.add(boids, 'attractorDistance', 0, 500).name('Distance');
 attractor.add(boids, 'attractorPercent', 0, 100).name('Percent');
-attractor.open();
 
-const detractor = gui.addFolder('Detractor');
+const detractor = gui.addFolder('Detractors');
 detractor.add(boids, 'detractorDistance', 0, 500).name('Distance');
 detractor.add(boids, 'detractorPercent', 0, 100).name('Percent');
-detractor.open();
+
+const wind = gui.addFolder('Wind');
+wind.add(boids, 'windDirection', 0, 360).name('Direction');
+wind.add(boids, 'windPower', 0, 15).name('Power');
 
 const misc = gui.addFolder('Misc');
 misc.add(boids, 'maxSpeed', 0, 1000).name('Max Speed');
@@ -371,4 +385,3 @@ misc.add(boids, 'wallDistance', 0, 362).name('Wall Distance');
 misc.add(boids, 'jitter', 0, 100).name('Jitter');
 misc.add(boids, 'wrapAround').name('Wrap Around');
 misc.add(boids, 'explode').name('Explode');
-misc.open();
