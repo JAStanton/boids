@@ -7,6 +7,7 @@ const SCREEN_WIDTH = 900;
 const SCREEN_HEIGHT = 600;
 
 const ATTRACTOR_WIDTH = 10;
+const DETRACTOR_WIDTH = 10;
 const BOID_WIDTH = 4;
 const NUM_BOIDS = MAGIC ? 10 : 200;
 
@@ -17,6 +18,7 @@ class Boids {
   constructor() {
     this.boids = [];
     this.attractors = [];
+    this.detractors = [];
 
     this.centerOfMassDistance = 265;
     this.centerOfMassPercent = 17;
@@ -29,6 +31,9 @@ class Boids {
 
     this.attractorDistance = 200;
     this.attractorPercent = 93;
+
+    this.detractorDistance = 200;
+    this.detractorPercent = 93;
 
     this.maxSpeed = 200;
     this.jitter = 4;
@@ -49,10 +54,13 @@ class Boids {
     Crafty.e('2D, Canvas, Color, Mouse')
       .attr({x: 0, y: 0, w: SCREEN_WIDTH, h: SCREEN_HEIGHT})
       .color('black')
-      .bind('Click', function(MouseEvent){
-        that._createAttractor(MouseEvent.offsetX, MouseEvent.offsetY);
-      });
-
+      .bind('MouseUp', function(event) {
+        if (event.mouseButton ===  Crafty.mouseButtons.LEFT) {
+          that._createAttractor(event.offsetX, event.offsetY);
+        } else if (event.mouseButton ===  Crafty.mouseButtons.RIGHT) {
+          that._createDetractor(event.offsetX, event.offsetY);
+        }
+      })
     // boids
     _.times(NUM_BOIDS, () => {
       const x = _.random(0, SCREEN_WIDTH - BOID_WIDTH);
@@ -87,6 +95,7 @@ class Boids {
       modifiers.push(this._calcStayAwayFromTheWalls(boid));
     }
     modifiers.push(this._calcAttractors(boid));
+    modifiers.push(this._calcDetractors(boid));
     modifiers.push(this._addJitter(boid));
 
     _.each(modifiers, (modifier) => boid.velocity.add(modifier));
@@ -174,6 +183,27 @@ class Boids {
     });
   }
 
+  _createDetractor(x, y) {
+    const that = this;
+    const attractor = Crafty.e('2D, Canvas, Color, Mouse')
+      .attr({
+        position: new Vector(x, y),
+        x: x,
+        y: y,
+        w: DETRACTOR_WIDTH,
+        h: DETRACTOR_WIDTH,
+      })
+      .color('red')
+      .bind('MouseUp', function(MouseEvent) {
+        if (event.mouseButton ===  Crafty.mouseButtons.LEFT) {
+          _.remove(that.detractors, this)
+          this.destroy();
+        }
+      });
+
+    this.detractors.push(attractor);
+  }
+
   _createAttractor(x, y) {
     const that = this;
     const attractor = Crafty.e('2D, Canvas, Color, Mouse')
@@ -185,9 +215,11 @@ class Boids {
         h: ATTRACTOR_WIDTH,
       })
       .color('green')
-      .bind('Click', function(MouseEvent) {
-        _.remove(that.attractors, this)
-        this.destroy();
+      .bind('MouseUp', function(MouseEvent) {
+        if (event.mouseButton ===  Crafty.mouseButtons.LEFT) {
+          _.remove(that.attractors, this)
+          this.destroy();
+        }
       });
 
     this.attractors.push(attractor);
@@ -269,6 +301,22 @@ class Boids {
     return new Vector(newX, newY);
   }
 
+  _calcDetractors(boid) {
+    const velocity = new Vector();
+    if (this.detractors.length === 0) return velocity;
+    let num = 0;
+    _.each(this.detractors, detractor => {
+      const distance = Math.abs(boid.position.distance(detractor.position));
+      if (distance > this.detractorDistance) return;
+      const magnitude = distance - this.detractorDistance;
+      const angle = Math.PI - boid.position.angleTo(detractor.position);
+      const x = Math.cos(angle) * magnitude;
+      const y = Math.sin(angle) * magnitude;
+      velocity.add(new Vector(x, y));
+    });
+    return velocity.divide(new Vector(101 - this.detractorPercent, 101 - this.detractorPercent));;
+  }
+
   _calcAttractors(boid) {
     if (this.attractors.length === 0) return new Vector();
     let closestAttractor, closestDistance;
@@ -311,6 +359,11 @@ const attractor = gui.addFolder('Attractor');
 attractor.add(boids, 'attractorDistance', 0, 500).name('Distance');
 attractor.add(boids, 'attractorPercent', 0, 100).name('Percent');
 attractor.open();
+
+const detractor = gui.addFolder('Detractor');
+detractor.add(boids, 'detractorDistance', 0, 500).name('Distance');
+detractor.add(boids, 'detractorPercent', 0, 100).name('Percent');
+detractor.open();
 
 const misc = gui.addFolder('Misc');
 misc.add(boids, 'maxSpeed', 0, 1000).name('Max Speed');
