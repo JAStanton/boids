@@ -1,6 +1,3 @@
-var _ = require('lodash');
-var Crafty = require('craftyjs');
-
 const SCREEN_WIDTH = 900;
 const SCREEN_HEIGHT = 570;
 
@@ -316,39 +313,41 @@ class Boids {
 
 }
 
-const boids = new Boids();
-const gui = new dat.GUI();
+window.onload = function() {
+  const boids = new Boids();
+  const gui = new dat.GUI();
 
-const centerOfMass = gui.addFolder('Cohesion');
-centerOfMass.add(boids, 'centerOfMassDistance', 0, 500).name('Distance');
-centerOfMass.add(boids, 'centerOfMassPercent', 0, 100).name('Percent');
-centerOfMass.open();
+  const centerOfMass = gui.addFolder('Cohesion');
+  centerOfMass.add(boids, 'centerOfMassDistance', 0, 500).name('Distance');
+  centerOfMass.add(boids, 'centerOfMassPercent', 0, 100).name('Percent');
+  centerOfMass.open();
 
-const maintainDistance = gui.addFolder('Separation');
-maintainDistance.add(boids, 'distanceUnit', 0, 200).name('Distance');
-maintainDistance.add(boids, 'distancePercent', 0, 100).name('Percent');
-maintainDistance.open();
+  const maintainDistance = gui.addFolder('Separation');
+  maintainDistance.add(boids, 'distanceUnit', 0, 200).name('Distance');
+  maintainDistance.add(boids, 'distancePercent', 0, 100).name('Percent');
+  maintainDistance.open();
 
-const matchVelocity = gui.addFolder('Alignment');
-matchVelocity.add(boids, 'matchVelocityDistance', 0, 500).name('Distance');
-matchVelocity.add(boids, 'matchVelocityPercent', 0, 100).name('Percent');
-matchVelocity.open();
+  const matchVelocity = gui.addFolder('Alignment');
+  matchVelocity.add(boids, 'matchVelocityDistance', 0, 500).name('Distance');
+  matchVelocity.add(boids, 'matchVelocityPercent', 0, 100).name('Percent');
+  matchVelocity.open();
 
-const attractor = gui.addFolder('Attractors');
-attractor.add(boids, 'attractorDistance', 0, 500).name('Distance');
-attractor.add(boids, 'attractorPercent', 0, 100).name('Percent');
+  const attractor = gui.addFolder('Attractors');
+  attractor.add(boids, 'attractorDistance', 0, 500).name('Distance');
+  attractor.add(boids, 'attractorPercent', 0, 100).name('Percent');
 
-const detractor = gui.addFolder('Detractors');
-detractor.add(boids, 'detractorDistance', 0, 500).name('Distance');
-detractor.add(boids, 'detractorPercent', 0, 100).name('Percent');
+  const detractor = gui.addFolder('Detractors');
+  detractor.add(boids, 'detractorDistance', 0, 500).name('Distance');
+  detractor.add(boids, 'detractorPercent', 0, 100).name('Percent');
 
-const wind = gui.addFolder('Wind');
-wind.add(boids, 'windDirection', 0, 360).name('Direction');
-wind.add(boids, 'windPower', 0, 15).name('Power');
+  const wind = gui.addFolder('Wind');
+  wind.add(boids, 'windDirection', 0, 360).name('Direction');
+  wind.add(boids, 'windPower', 0, 15).name('Power');
 
-const misc = gui.addFolder('Misc');
-misc.add(boids, 'maxSpeed', 0, 1000).name('Max Speed');
-misc.add(boids, 'wallDistance', 0, 362).name('Wall Distance');
-misc.add(boids, 'jitter', 0, 100).name('Jitter');
-misc.add(boids, 'wrapAround').name('Wrap Around');
-misc.add(boids, 'explode').name('Explode');
+  const misc = gui.addFolder('Misc');
+  misc.add(boids, 'maxSpeed', 0, 1000).name('Max Speed');
+  misc.add(boids, 'wallDistance', 0, 362).name('Wall Distance');
+  misc.add(boids, 'jitter', 0, 100).name('Jitter');
+  misc.add(boids, 'wrapAround').name('Wrap Around');
+  misc.add(boids, 'explode').name('Explode');
+}
