@@ -44,25 +44,25 @@ class Boids {
     this.wrapAround = false;
 
     this.init();
-
   }
 
   init() {
     Crafty.init(SCREEN_WIDTH, SCREEN_HEIGHT);
     Crafty.background('black');
-    const that = this;
 
     // canvas
     Crafty.e('2D, Canvas, Color, Mouse')
       .attr({x: 0, y: 0, w: SCREEN_WIDTH, h: SCREEN_HEIGHT})
       .color('black')
-      .bind('MouseUp', function(event) {
+      .bind('MouseUp', event => {
         if (event.mouseButton ===  Crafty.mouseButtons.LEFT) {
-          that._createAttractor(event.offsetX, event.offsetY);
+          this._createAttractor(event.offsetX, event.offsetY);
         } else if (event.mouseButton ===  Crafty.mouseButtons.RIGHT) {
-          that._createDetractor(event.offsetX, event.offsetY);
+          this._createDetractor(event.offsetX, event.offsetY);
         }
       })
+
+    const that = this;
     // boids
     _.times(NUM_BOIDS, () => {
       const x = _.random(0, SCREEN_WIDTH - BOID_WIDTH);
@@ -100,43 +100,21 @@ class Boids {
     modifiers.push(this._addJitter(boid));
     modifiers.push(this._calcWind());
 
-    _.each(modifiers, (modifier) => boid.velocity.add(modifier));
+    _.each(modifiers, m => boid.velocity.add(m));
 
-    // Speed limit
-    let vx = boid.velocity.x;
-    let vy = boid.velocity.y;
-    vx = _.clamp(vx, -this.maxSpeed, this.maxSpeed);
-    vy = _.clamp(vy, -this.maxSpeed, this.maxSpeed);
-    boid.velocity.setValues(vx, vy);
+    this._speedLimit(boid);
 
+    // Update baed on FPS
     const fudge = eventData.dt / 1000;
     const fudgeVector = new Vector(fudge, fudge);
     const newVelocity = boid.velocity.clone().multiply(fudgeVector);
 
+    // Update position based on new velocity.
     boid.position.add(newVelocity);
-
     boid.x = boid.position.x;
     boid.y = boid.position.y;
 
-    if (this.wrapAround) {
-      if (boid.x > SCREEN_WIDTH) {
-        boid.x = 0;
-        boid.position.setValues(0, boid.position.y);
-      }
-      if (boid.x < 0) {
-        boid.x = SCREEN_WIDTH
-        boid.position.setValues(SCREEN_WIDTH, boid.position.y);
-      }
-
-      if (boid.y > SCREEN_HEIGHT) {
-        boid.y = 0;
-        boid.position.setValues(boid.position.x, 0);
-      }
-      if (boid.y < 0) {
-        boid.y = SCREEN_HEIGHT;
-        boid.position.setValues(boid.position.x, SCREEN_HEIGHT);
-    }
-    }
+    this._wrapAround(boid);
   }
 
   explode() {
@@ -146,6 +124,34 @@ class Boids {
         _.sample([-this.maxSpeed, this.maxSpeed])
       );
     });
+  }
+
+  _speedLimit(boid) {
+    const vx = _.clamp(boid.velocity.x, -this.maxSpeed, this.maxSpeed);
+    const vy = _.clamp(boid.velocity.y, -this.maxSpeed, this.maxSpeed);
+    boid.velocity.setValues(vx, vy);
+  }
+
+  _wrapAround(boid) {
+    if (!this.wrapAround) return;
+
+    if (boid.x > SCREEN_WIDTH) {
+      boid.x = 0;
+      boid.position.setValues(0, boid.position.y);
+    }
+    if (boid.x < 0) {
+      boid.x = SCREEN_WIDTH
+      boid.position.setValues(SCREEN_WIDTH, boid.position.y);
+    }
+
+    if (boid.y > SCREEN_HEIGHT) {
+      boid.y = 0;
+      boid.position.setValues(boid.position.x, 0);
+    }
+    if (boid.y < 0) {
+      boid.y = SCREEN_HEIGHT;
+      boid.position.setValues(boid.position.x, SCREEN_HEIGHT);
+    }
   }
 
   _createDetractor(x, y) {
