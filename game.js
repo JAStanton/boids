@@ -18,15 +18,17 @@ class Boids {
     this.boids = [];
     this.attractors = [];
 
-    this.maxSpeed = 200;
+    this.maxSpeed = 350;
     this.wallDistance = 60;
-    this.centerOfMassPercent = 79;
+    this.centerOfMassDistance = 265;
+    this.centerOfMassPercent = 17;
     this.distanceUnit = 23;
     this.distancePercent = 80;
-    this.matchVelocityPercent = 12;
+    this.matchVelocityDistance = 42;
+    this.matchVelocityPercent = 68;
     this.attractorDistance = 200;
     this.attractorPercent = 98;
-    this.jitter = 18;
+    this.jitter = 4;
 
     this.init();
 
@@ -71,19 +73,15 @@ class Boids {
   }
 
   frame(eventData, boid) {
-    const v1 = this._ruleCenterOfMass(boid);
-    const v2 = this._ruleDistance(boid);
-    const v3 = this._ruleMatchVelocity(boid);
-    const v4 = this._ruleStayAwayFromTheWalls(boid);
-    const v5 = this._ruleAttractors(boid);
-    const v6 = this._addJitter(boid);
+    const modifiers = [];
+    modifiers.push(this._ruleCenterOfMass(boid));
+    modifiers.push(this._ruleDistance(boid));
+    modifiers.push(this._ruleMatchVelocity(boid));
+    modifiers.push(this._ruleStayAwayFromTheWalls(boid));
+    modifiers.push(this._ruleAttractors(boid));
+    modifiers.push(this._addJitter(boid));
 
-    boid.velocity.add(v1);
-    boid.velocity.add(v2);
-    boid.velocity.add(v3);
-    boid.velocity.add(v4);
-    boid.velocity.add(v5);
-    boid.velocity.add(v6);
+    _.each(modifiers, (modifier) => boid.velocity.add(modifier));
 
     // Speed limit
     let vx = boid.velocity.x;
@@ -167,11 +165,16 @@ class Boids {
 
   _ruleCenterOfMass(boid) {
     const velocity = new Vector();
+    let num = 0;
     _.each(this.boids, b => {
       if (boid === b) return;
-      velocity.add(b.position);
+      if (Math.abs(boid.position.distance(b.position)) < this.centerOfMassDistance) {
+        velocity.add(b.position);
+        num++;
+      }
     });
-    velocity.divide(new Vector(NUM_BOIDS - 1, NUM_BOIDS - 1));
+    if (num === 0) return new Vector();
+    velocity.divide(new Vector(num, num));
     return velocity.subtract(boid.position)
       .divide(new Vector(100 - this.centerOfMassPercent, 100 - this.centerOfMassPercent));
   }
@@ -190,12 +193,18 @@ class Boids {
 
   _ruleMatchVelocity(boid) {
     const velocity = new Vector();
+    let num = 0;
     _.each(this.boids, b => {
       if (boid === b) return;
-      velocity.add(b.velocity);
+      if (Math.abs(boid.position.distance(b.position)) < this.matchVelocityDistance) {
+        num++;
+        velocity.add(b.velocity);
+      }
     });
 
-    return velocity.divide(new Vector(NUM_BOIDS - 1, NUM_BOIDS - 1))
+    if (num === 0) return new Vector();
+
+    return velocity.divide(new Vector(num, num))
       .subtract(boid.velocity)
       .divide(new Vector(101 - this.matchVelocityPercent, 101 - this.matchVelocityPercent));
   }
@@ -224,20 +233,35 @@ class Boids {
   }
 
   _ruleAttractors(boid) {
-    const velocity = new Vector();
-    if (this.attractors.length === 0) return velocity;
-    let numAttractors = 0;
-    _.each(this.attractors, a => {
-      if (Math.abs(boid.position.distance(a.position)) < this.attractorDistance) {
-        numAttractors++;
-        velocity.add(a.position);
+    if (this.attractors.length === 0) return new Vector();
+    let closestAttractor, closestDistance;
+    _.each(this.attractors, function(attractor) {
+      const distance = Math.abs(boid.position.distance(attractor.position));
+      if ((!closestDistance || distance < closestDistance) && distance < this.attractorDistance) {
+        closestDistance = distance;
+        closestAttractor = attractor;
       }
-    });
-    if (numAttractors === 0) return velocity;
-    velocity.divide(new Vector(numAttractors, numAttractors));
-    return velocity
-      .subtract(boid.position)
-      .divide(new Vector(100 - this.attractorPercent, 100 - this.attractorPercent));
+    }.bind(this));
+    if (closestAttractor) {
+      return closestAttractor.position.clone()
+        .subtract(boid.position)
+        .divide(new Vector(100 - this.attractorPercent, 100 - this.attractorPercent));
+    }
+    return new Vector();
+  //   const velocity = new Vector();
+  //   if (this.attractors.length === 0) return velocity;
+  //   let numAttractors = 0;
+  //   _.each(this.attractors, a => {
+  //     if (Math.abs(boid.position.distance(a.position)) < this.attractorDistance) {
+  //       numAttractors++;
+  //       velocity.add(a.position);
+  //     }
+  //   });
+  //   if (numAttractors === 0) return velocity;
+  //   // velocity.divide(new Vector(numAttractors, numAttractors));
+  //   return velocity
+  //     .subtract(boid.position)
+  //     .divide(new Vector(100 - this.attractorPercent, 100 - this.attractorPercent));
   }
 
 }
@@ -247,9 +271,11 @@ const gui = new dat.GUI();
 
 gui.add(boids, 'maxSpeed', 0, 1000);
 gui.add(boids, 'wallDistance', 0, 362);
+gui.add(boids, 'centerOfMassDistance', 0, 500);
 gui.add(boids, 'centerOfMassPercent', 0, 100);
 gui.add(boids, 'distanceUnit', 0, 200);
 gui.add(boids, 'distancePercent', 0, 100);
+gui.add(boids, 'matchVelocityDistance', 0, 500);
 gui.add(boids, 'matchVelocityPercent', 0, 100);
 gui.add(boids, 'attractorDistance', 0, 500);
 gui.add(boids, 'attractorPercent', 0, 100);
