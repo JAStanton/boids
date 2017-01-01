@@ -30,9 +30,9 @@ class Boids {
     this.attractorDistance = 200;
     this.attractorPercent = 93;
 
-    this.maxSpeed = 350;
+    this.maxSpeed = 200;
     this.jitter = 4;
-    this.wallDistance = 60;
+    this.wallDistance = 0;
 
     this.wrapAround = false;
 
@@ -59,7 +59,7 @@ class Boids {
       const y = _.random(0, SCREEN_HEIGHT - BOID_WIDTH);
       const vx = _.random(-100, 100);
       const vy = _.random(-100, 100);
-      const width = _.random(3, 4, true);
+      const width = _.random(2, 4, true);
       const boid = Crafty.e('2D, Canvas, Color, Motion').attr({
         x: x,
         y: y,
@@ -70,7 +70,7 @@ class Boids {
         particle: MAGIC ? this._createParticle(x, y) : {},
       })
       .color('white')
-      .bind("EnterFrame", function(eventData) {
+      .bind('EnterFrame', function(eventData) {
         that.frame(eventData, this);
       });
 
@@ -80,13 +80,13 @@ class Boids {
 
   frame(eventData, boid) {
     const modifiers = [];
-    modifiers.push(this._ruleCenterOfMass(boid));
-    modifiers.push(this._ruleDistance(boid));
-    modifiers.push(this._ruleMatchVelocity(boid));
+    modifiers.push(this._calcCenterOfMass(boid));
+    modifiers.push(this._calcDistance(boid));
+    modifiers.push(this._calcMatchVelocity(boid));
     if (!this.wrapAround) {
-      modifiers.push(this._ruleStayAwayFromTheWalls(boid));
+      modifiers.push(this._calcStayAwayFromTheWalls(boid));
     }
-    modifiers.push(this._ruleAttractors(boid));
+    modifiers.push(this._calcAttractors(boid));
     modifiers.push(this._addJitter(boid));
 
     _.each(modifiers, (modifier) => boid.velocity.add(modifier));
@@ -200,7 +200,7 @@ class Boids {
     );
   }
 
-  _ruleCenterOfMass(boid) {
+  _calcCenterOfMass(boid) {
     const velocity = new Vector();
     let num = 0;
     _.each(this.boids, b => {
@@ -216,7 +216,7 @@ class Boids {
       .divide(new Vector(100 - this.centerOfMassPercent, 100 - this.centerOfMassPercent));
   }
 
-  _ruleDistance(boid) {
+  _calcDistance(boid) {
     const velocity = new Vector();
     _.each(this.boids, b => {
       if (boid === b) return;
@@ -228,7 +228,7 @@ class Boids {
     return velocity.scale(this.distancePercent / 100);
   }
 
-  _ruleMatchVelocity(boid) {
+  _calcMatchVelocity(boid) {
     const velocity = new Vector();
     let num = 0;
     _.each(this.boids, b => {
@@ -246,7 +246,7 @@ class Boids {
       .divide(new Vector(101 - this.matchVelocityPercent, 101 - this.matchVelocityPercent));
   }
 
-  _ruleStayAwayFromTheWalls(boid) {
+  _calcStayAwayFromTheWalls(boid) {
     let newX = 0;
     let newY = 0;
 
@@ -269,7 +269,7 @@ class Boids {
     return new Vector(newX, newY);
   }
 
-  _ruleAttractors(boid) {
+  _calcAttractors(boid) {
     if (this.attractors.length === 0) return new Vector();
     let closestAttractor, closestDistance;
     _.each(this.attractors, function(attractor) {
